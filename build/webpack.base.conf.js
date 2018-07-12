@@ -22,20 +22,22 @@ module.exports = {
     extensions: ['.js', '.vue', '.json'],
     alias: {
       '@': resolve('src'),
+			'components': resolve('src/components'),
+			'api': resolve('src/api'),
       'common': resolve('src/common')
     }
   },
   module: {
     rules: [
-      {
-        test: /\.(js|vue)$/,
-        loader: 'eslint-loader',
-        enforce: 'pre',
-        include: [resolve('src'), resolve('test')],
-        options: {
-          formatter: require('eslint-friendly-formatter')
-        }
-      },
+//       {
+//         test: /\.(js|vue)$/,
+//         loader: 'eslint-loader',
+//         enforce: 'pre',
+//         include: [resolve('src'), resolve('test')],
+//         options: {
+//           formatter: require('eslint-friendly-formatter')
+//         }
+//       },
       {
         test: /\.vue$/,
         loader: 'vue-loader',
