@@ -1,12 +1,12 @@
 <template>
   <div class="common_wrapper">
-    <Scroll class="recommend_content" :data="discList">
+    <Scroll class="common_content" :data="discList">
       <div>
         <Carousel :carouselData="carouselData"></Carousel>
         <div class="recommend_list">
           <h3 class="list-title">热门歌单推荐</h3>
           <ul>
-            <li v-for="item in discList" class="item">
+            <li v-for="item in discList" class="item" :key="item.dissid">
               <div class="avatar">
                 <img v-lazy="item.imgurl"
                      alt="">
@@ -78,7 +78,7 @@
     bottom 0
     left 0
     right 0
-    .recommend_content
+    .common_content
       height 100%
   .recommend_list
     .list-title
