@@ -1,8 +1,11 @@
 <template>
   <div class="slider-wrapper">
-    <swiper :options="swiperOption">
+    <swiper :options="swiperOption" v-if="carouselData.length>0">
       <!-- slides -->
-      <swiper-slide :key="item.id" v-for="item in carouselData"><img width="100%" :src="item.picUrl" alt="">
+      <swiper-slide :key="item.id" v-for="item in carouselData"><img
+        @click="jumpOut(item.linkUrl)" width="100%"
+        :src="item.picUrl"
+        alt="">
       </swiper-slide>
       <!-- Optional controls -->
       <div class="swiper-pagination" slot="pagination"></div>
@@ -12,6 +15,12 @@
 
 <script>
   export default {
+    props: {
+      carouselData: {
+        type: Array,
+        default: []
+      }
+    },
     name: 'carousel',
     data() {
       return {
@@ -25,34 +34,12 @@
           pagination: {
             el: '.swiper-pagination'
           }
-        },
-        carouselData: [
-          {
-            linkUrl: 'https://y.qq.com/m/digitalbum/gold/index.html?_video=true&id=4124273&g_f=shoujijiaodian',
-            picUrl: 'http://y.gtimg.cn/music/common/upload/MUSIC_FOCUS/300107.jpg',
-            id: 16504
-          },
-          {
-            linkUrl: 'http://y.qq.com/m/act/sfhd/152.html?ADTAG=banner&openinqqmusic=1',
-            picUrl: 'http://y.gtimg.cn/music/common/upload/MUSIC_FOCUS/301645.jpg',
-            id: 16554
-          },
-          {
-            linkUrl: 'https://y.qq.com/m/act/sfhd/151.html?ADTAG=jdt',
-            picUrl: 'http://y.gtimg.cn/music/common/upload/MUSIC_FOCUS/301136.jpg',
-            id: 16537
-          },
-          {
-            linkUrl: 'http://y.qq.com/w/album.html?albummid=001ENaAD3DwMkl',
-            picUrl: 'http://y.gtimg.cn/music/common/upload/MUSIC_FOCUS/301861.jpg',
-            id: 16553
-          },
-          {
-            linkUrl: 'http://y.qq.com/w/album.html?albummid=003nlRrP1C4A74',
-            picUrl: 'http://y.gtimg.cn/music/common/upload/MUSIC_FOCUS/301143.jpg',
-            id: 16545
-          }
-        ]
+        }
+      }
+    },
+    methods: {
+      jumpOut(linkUrl) {
+        location.href = linkUrl
       }
     }
   }
@@ -70,4 +57,7 @@
 
   .slider-wrapper .swiper-pagination-bullet
     background hsla(0, 0%, 100%, .5)
+
+  .swiper-slide
+    padding-bottom 40%
 </style>

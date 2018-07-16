@@ -28,13 +28,13 @@ module.exports = {
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
-      '/api/carousel': {
-        target: 'https://c.y.qq.com/musichall/fcgi-bin/fcg_yqqhomepagerecommend.fcg',
-        changeOrigin: true,
-        pathRewrite: {
-          '^/api/carousel': '/'
-        }
-      }
+      // '/api/carousel': {
+      //   target: 'https://c.y.qq.com/musichall/fcgi-bin/fcg_yqqhomepagerecommend.fcg',
+      //   changeOrigin: true,
+      //   pathRewrite: {
+      //     '^/api/carousel': '/'
+      //   }
+      // }
     },
     // CSS Sourcemaps off by default because relative paths are "buggy"
     // with this option, according to the CSS-Loader README
