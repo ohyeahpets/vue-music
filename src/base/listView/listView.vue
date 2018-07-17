@@ -1,7 +1,7 @@
 <template>
-  <Scroll class="common_content listview" :data="listView" :listenScroll="true" @scroll="">
+  <Scroll class="common_content listview" :data="listView" :listenScroll="true" @scroll="" ref="scroll">
     <ul class="list-group-wrapper">
-      <li class="list-group" v-for="i of listView">
+      <li class="list-group" v-for="i of listView" ref="listGroup">
         <h2 class="list-group-title">{{i.title}}</h2>
         <ul>
           <li class="list-group-item" v-for="item in i.items">
@@ -12,12 +12,13 @@
         </ul>
       </li>
     </ul>
-    <div class="list-shortcut">
+    <div class="list-shortcut" @touchstart="onShortCutTouchStart" @touchmove="onShortCutTouchMove">
       <ul>
-        <li class="item" v-for="item in listView">{{iconTitle(item.title)}}</li>
+        <li class="item" :class="" v-for="(item,index) in listView" :data-index="index">{{iconTitle(item.title)}}
+        </li>
       </ul>
     </div>
-    <div class="list-fixed">
+    <div class="list-fixed" v-show="false">
       <div class="fixed-title">热门</div>
     </div>
   </Scroll>
@@ -25,6 +26,7 @@
 
 <script>
   import Scroll from 'base/scroll/scroll'
+  import {getData} from 'common/js/dom'
 
   export default {
     props: {
@@ -37,8 +39,20 @@
       return {}
     },
     methods: {
+      onShortCutTouchStart(e) {
+        let archorIndex = getData(e.target, 'index')
+        // 让元素滚到指定位置
+        this.$refs.scroll.scrollToElement(this.$refs.listGroup[archorIndex], 0)
+      },
+      onShortCutTouchMove() {
+
+      },
       iconTitle(title) {
-        return title.substring(0, 1)
+        if (title.length > 1) {
+          return title.substring(0, 1)
+        } else {
+          return title
+        }
       }
     },
     name: 'list-view',
