@@ -20,11 +20,13 @@
         </div>
       </div>
     </Scroll>
+    <loading v-show="!discList"></loading>
   </div>
 </template>
 
 <script>
   import Carousel from 'base/carousel/carousel'
+  import loading from 'base/loading/loading'
   import {getRecommend, getDiscList} from 'api/recommend'
   import {ERR_OK} from 'api/config'
   import Scroll from 'base/scroll/scroll'
@@ -39,7 +41,8 @@
     },
     components: {
       Carousel,
-      Scroll
+      Scroll,
+      loading
     },
     created() {
       this._getRecommend()
@@ -58,7 +61,7 @@
       _getDiscList() {
         getDiscList().then((res) => {
           if (res.code === ERR_OK) {
-            console.log(res.data.list)
+            // console.log(res.data.list)
             this.discList = res.data.list
           }
         }).catch((err) => {
@@ -80,6 +83,7 @@
     right 0
     .common_content
       height 100%
+
   .recommend_list
     .list-title
       color $color-theme

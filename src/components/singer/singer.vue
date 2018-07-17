@@ -1,39 +1,27 @@
 <template>
   <div class="common_wrapper singer">
-    <Scroll class="common_content">
-      <ul class="list-group-wrapper">
-        <li class="list-group" v-for="i of singers">
-          <h2 class="list-group-title">{{i.title}}</h2>
-          <ul>
-            <li class="list-group-item" v-for="item in i.items">
-              <img class="avatar"
-                   :src="item.avatar" alt="">
-              <span class="name">{{item.name}}</span>
-            </li>
-          </ul>
-        </li>
-      </ul>
-    </Scroll>
+    <listView :listView="singers"></listView>
   </div>
 </template>
 
 <script>
+  import listView from 'base/listView/listView'
   import {getSingerList} from 'api/singer'
   import {ERR_OK} from 'api/config'
   import Singer from 'common/js/singer'
-  import Scroll from 'base/scroll/scroll'
 
   const HOT_NAME = '热门'
   const HOT_SINGER_LEN = 10
+  // const FIXED_TITLE_HEIGHT = 30
   export default {
     name: 'singer',
     data() {
       return {
-        singers: {}
+        singers: []
       }
     },
     components: {
-      Scroll
+      listView
     },
     created() {
       this._getSingerList()
@@ -75,7 +63,16 @@
             name: item.Fsinger_name
           }))
         })
-        return map
+        // 将对象转化成有序数组，方便操作
+        let arr = []
+        let newMap = Object.keys(map).sort()
+        newMap.forEach((item, index) => {
+          arr.push(map[item])
+        })
+        let hot = arr.pop()
+        arr = arr.splice(1)
+        arr.unshift(hot)
+        return arr
       }
     }
   }
@@ -89,30 +86,4 @@
     bottom 0
     left 0
     right 0
-    .common_content
-      height 100%
-
-  .singer
-    .list-group-wrapper
-      .list-group
-        padding-bottom 30px
-        .list-group-title
-          height: 30px;
-          line-height: 30px;
-          padding-left: 20px;
-          font-size: 12px;
-          color: hsla(0, 0%, 100%, .5);
-          background: #333;
-        .list-group-item
-          display: flex;
-          align-items: center;
-          padding: 20px 0 0 30px;
-          .avatar
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-          .name
-            margin-left: 20px;
-            color: hsla(0, 0%, 100%, .5);
-            font-size: 14px;
 </style>
