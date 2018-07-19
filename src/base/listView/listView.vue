@@ -1,5 +1,6 @@
 <template>
-  <Scroll class="common_content listview" :data="listView" :listenScroll="true" @scroll="" ref="scroll">
+  <Scroll class="common_content listview" :data="listView" :listenScroll="listenScroll" @scroll="scroll" ref="scroll"
+          :probeType="probeType">
     <ul class="list-group-wrapper">
       <li class="list-group" v-for="i of listView" ref="listGroup">
         <h2 class="list-group-title">{{i.title}}</h2>
@@ -12,9 +13,11 @@
         </ul>
       </li>
     </ul>
-    <div class="list-shortcut" @touchstart="onShortCutTouchStart" @touchmove="onShortCutTouchMove">
+    <div class="list-shortcut" @touchstart="onShortCutTouchStart" @touchmove.stop.prevent="onShortCutTouchMove">
       <ul>
-        <li class="item" :class="" v-for="(item,index) in listView" :data-index="index">{{iconTitle(item.title)}}
+        <li class="item" :class="_currentStyle(index)" v-for="(item,index) in listView" :data-index="index"
+            ref="shortcut">
+          {{iconTitle(item.title)}}
         </li>
       </ul>
     </div>
@@ -28,6 +31,7 @@
   import Scroll from 'base/scroll/scroll'
   import {getData} from 'common/js/dom'
 
+  const SHORT_CUT_HEIGHT = 18
   export default {
     props: {
       listView: {
@@ -36,16 +40,71 @@
       }
     },
     data() {
-      return {}
+      return {
+        scrollY: -1,
+        currentIndex: 0
+      }
+    },
+    created() {
+      // 定义一个touch对象，用来存储手指位置
+      this.touch = {}
+      this.listenScroll = true
+      this.listHeight = []
+      this.probeType = 3
     },
     methods: {
       onShortCutTouchStart(e) {
         let archorIndex = getData(e.target, 'index')
+        // 记录初始触摸的位置和索引值
+        this.touch.y1 = e.touches[0].pageY
+        this.touch.archorIndex = parseInt(archorIndex)
         // 让元素滚到指定位置
-        this.$refs.scroll.scrollToElement(this.$refs.listGroup[archorIndex], 0)
+        this._scrollTo(archorIndex)
       },
-      onShortCutTouchMove() {
-
+      onShortCutTouchMove(e) {
+        // 记录触摸移动时的位置
+        this.touch.y2 = e.touches[0].pageY
+        // 计算两者之间的相差多少，并计算出有多少个li的高度
+        let delta = Math.floor((this.touch.y2 - this.touch.y1) / SHORT_CUT_HEIGHT)
+        let archorIndex = parseInt(this.touch.archorIndex) + delta
+        this._scrollTo(archorIndex)
+        // this._setCurrentStyle(archorIndex)
+      },
+      scroll(pos) {
+        this.scrollY = pos.y
+      },
+      _calculateHeight() {
+        this.listHeight = []
+        const list = this.$refs.listGroup
+        let height = 0
+        this.listHeight.push(height)
+        for (let i = 0; i < list.length; i++) {
+          let item = list[i]
+          height += item.clientHeight
+          this.listHeight.push(height)
+        }
+        console.log(this.listHeight)
+      },
+      _scrollTo(index) {
+        // 边界限制设置
+        if (!index && index !== 0) {
+          return
+        }
+        if (index < 0) {
+          index = 0
+        } else if (index > this.listHeight.length - 2) {
+          index = this.listHeight.length - 2
+        }
+        // 滚动到元素位置  触发滚动事件效果
+        this.scrollY = -this.listHeight[index]
+        console.log(this.scrollY, index)
+        this.$refs.scroll.scrollToElement(this.$refs.listGroup[index], 0)
+      },
+      _currentStyle(index) {
+        return this.currentIndex === index ? 'current' : ''
+      },
+      _setCurrentStyle(index) {
+        this.currentIndex = index
       },
       iconTitle(title) {
         if (title.length > 1) {
@@ -53,6 +112,29 @@
         } else {
           return title
         }
+      }
+    },
+    watch: {
+      listView() {
+        // listView数据变化了  就重新渲染dom
+        setTimeout(() => {
+          this._calculateHeight()
+        }, 20)
+      },
+      scrollY(newY) {
+        const listHeight = this.listHeight
+        if (newY > 0) {
+          this.currentIndex = 0
+          return
+        }
+        // 循环listHeight
+        for (let i = 0; i < listHeight.length - 1; i++) {
+          if (-newY >= listHeight[i] && -newY < listHeight[i + 1]) {
+            this.currentIndex = i
+            return
+          }
+        }
+        this.currentIndex = listHeight.length - 2
       }
     },
     name: 'list-view',
@@ -81,6 +163,8 @@
         line-height: 1;
         color: hsla(0, 0%, 100%, .5);
         font-size: 12px;
+        &.current
+          color #ffcd32
 
   .common_content
     position relative
