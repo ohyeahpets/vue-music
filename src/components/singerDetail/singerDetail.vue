@@ -17,7 +17,7 @@
 <script>
   import SongsList from 'components/songsList/songsList'
   import {mapGetters} from 'vuex'
-	import {getSingerData} from 'api/singer'
+  import {getSingerData} from 'api/singer'
 
   export default {
     name: 'singer-detail',
@@ -27,7 +27,7 @@
     data() {
       return {
         singerData: {},
-				songsList: []
+        songsList: []
       }
     },
     computed: {
@@ -38,7 +38,7 @@
         this.$router.back()
       }
       this.singerData = this.singer
-			this._getSingerData()
+      this._getSingerData()
     },
     mounted() {
       this.$refs.bgImage.style.background = `url(${this.singerData.avatar}) no-repeat`
@@ -48,16 +48,16 @@
       jumpBack() {
         this.$router.back()
       },
-			_getSingerData() {
-				getSingerData(this.singerData.id).then((res)=>{
-						if(res.code===0){
-						this.songsList = res.data.list
-						console.log(res.data)
-					}
-				}).catch((err)=>{
-					console.log(err)
-				})
-			}
+      _getSingerData() {
+        getSingerData(this.singerData.id).then((res) => {
+          if (res.code === 0) {
+            this.songsList = res.data.list
+            console.log(res.data)
+          }
+        }).catch((err) => {
+          console.log(err)
+        })
+      }
     }
   }
 </script>

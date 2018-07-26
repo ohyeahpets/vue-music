@@ -32,7 +32,7 @@ export function getSingerData(singerId) {
     needNewCode: 0,
     order: 'listen',
     begin: 0,
-    num: 30,
+    num: 100,
     singermid: singerId,
     songstatus: 1
   })
