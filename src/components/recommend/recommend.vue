@@ -81,6 +81,7 @@
     bottom 0
     left 0
     right 0
+    overflow hidden
     .common_content
       height 100%
 

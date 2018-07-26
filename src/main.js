@@ -6,6 +6,7 @@ import 'element-ui/lib/theme-chalk/index.css'
 import FastClick from 'fastclick'
 import App from './App'
 import router from './router'
+import store from './store'
 import 'common/stylus/index.styl'
 import 'swiper/dist/css/swiper.css'
 
@@ -23,5 +24,6 @@ Vue.use(VueLazyload, {
 new Vue({
   el: '#app',
   render: h => h(App),
-  router
+  router,
+  store
 })

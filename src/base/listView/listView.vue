@@ -5,7 +5,7 @@
       <li class="list-group" v-for="i of listView" ref="listGroup">
         <h2 class="list-group-title">{{i.title}}</h2>
         <ul>
-          <li class="list-group-item" v-for="item in i.items">
+          <li class="list-group-item" v-for="item in i.items" @click="selectItem(item)">
             <img class="avatar"
                  v-lazy="item.avatar" alt="">
             <span class="name">{{item.name}}</span>
@@ -21,8 +21,8 @@
         </li>
       </ul>
     </div>
-    <div class="list-fixed" v-show="false">
-      <div class="fixed-title">热门</div>
+    <div class="list-fixed" v-show="isFixedShow" v-if="listView.length>0" ref="listFixed">
+      <div class="fixed-title">{{_fixedTitle}}</div>
     </div>
   </Scroll>
 </template>
@@ -32,6 +32,7 @@
   import {getData} from 'common/js/dom'
 
   const SHORT_CUT_HEIGHT = 18
+  const LIST_FIXED = 30
   export default {
     props: {
       listView: {
@@ -42,7 +43,8 @@
     data() {
       return {
         scrollY: -1,
-        currentIndex: 0
+        currentIndex: 0,
+        isFixedShow: true
       }
     },
     created() {
@@ -51,6 +53,11 @@
       this.listenScroll = true
       this.listHeight = []
       this.probeType = 3
+    },
+    computed: {
+      _fixedTitle() {
+        return this.listView.length > 0 ? this.listView[this.currentIndex].title : '热门'
+      }
     },
     methods: {
       onShortCutTouchStart(e) {
@@ -73,6 +80,9 @@
       scroll(pos) {
         this.scrollY = pos.y
       },
+      selectItem(item) {
+        this.$emit('select', item)
+      },
       _calculateHeight() {
         this.listHeight = []
         const list = this.$refs.listGroup
@@ -83,7 +93,7 @@
           height += item.clientHeight
           this.listHeight.push(height)
         }
-        console.log(this.listHeight)
+        // console.log(this.listHeight)
       },
       _scrollTo(index) {
         // 边界限制设置
@@ -125,16 +135,26 @@
         const listHeight = this.listHeight
         if (newY > 0) {
           this.currentIndex = 0
+          this.isFixedShow = false
           return
         }
         // 循环listHeight
         for (let i = 0; i < listHeight.length - 1; i++) {
+          if (-newY >= listHeight[i + 1] - LIST_FIXED && -newY < listHeight[i + 1]) {
+            let scroll_height = LIST_FIXED - listHeight[i + 1] - newY
+            this.$refs.listFixed.style.transform = `translateY(-${scroll_height}px)`
+          } else {
+            this.$refs.listFixed.style.transform = `translateY(0px)`
+          }
           if (-newY >= listHeight[i] && -newY < listHeight[i + 1]) {
             this.currentIndex = i
+            this.isFixedShow = true
             return
           }
         }
         this.currentIndex = listHeight.length - 2
+        // 如果滚动到距离第n个元素30px时
+        this.isFixedShow = true
       }
     },
     name: 'list-view',
@@ -148,7 +168,7 @@
   .listview
     .list-shortcut
       position: absolute
-      z-index: 30
+      z-index: 3
       right: 0
       top: 50%
       transform: translateY(-50%)

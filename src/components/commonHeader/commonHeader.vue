@@ -28,7 +28,7 @@
   @import "~common/stylus/variable.styl"
   @import "~common/stylus/mixin.styl"
   .cHeader_wrapper
-    position: relative
+    position: fixed
     top: 0
     left: 0
     height: 88px
