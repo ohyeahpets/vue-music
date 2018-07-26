@@ -3,10 +3,10 @@
     <div class="songs-list-wrapper">
       <div class="songs-list">
         <ul>
-          <li class="item">
+          <li class="item" v-for="item in songsList" v-if="songsList.length>0">
             <div class="content">
-              <h2 class="name">等你下课(with 杨瑞代)</h2>
-              <p class="desc">周杰伦·等你下课</p>
+              <h2 class="name">{{item.musicData.songname}}</h2>
+              <p class="desc">{{handleSingersName(item.musicData.singer)}}</p>
             </div>
           </li>
         </ul>
@@ -17,7 +17,26 @@
 
 <script>
   export default {
-    name: 'songs-list'
+    name: 'songs-list',
+		props:{
+			songsList:{
+				type:Array,
+				defaul:[]
+			}
+		},
+		methods:{
+			handleSingersName(singers) {
+				let arr=[]
+				if(singers.length===1){
+					return singers[0].name
+				}else{
+					singers.forEach((index,item)=>{
+						arr.push(item.name)
+					})
+					return arr.join('')
+				}
+			}
+		}
   }
 </script>
 

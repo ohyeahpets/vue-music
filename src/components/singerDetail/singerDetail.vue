@@ -9,7 +9,7 @@
         </div>
         <div class="filter"></div>
       </div>
-      <SongsList></SongsList>
+      <SongsList :songsList="songsList"></SongsList>
     </div>
   </transition>
 </template>
@@ -17,6 +17,7 @@
 <script>
   import SongsList from 'components/songsList/songsList'
   import {mapGetters} from 'vuex'
+	import {getSingerData} from 'api/singer'
 
   export default {
     name: 'singer-detail',
@@ -25,7 +26,8 @@
     },
     data() {
       return {
-        singerData: {}
+        singerData: {},
+				songsList: []
       }
     },
     computed: {
@@ -36,6 +38,7 @@
         this.$router.back()
       }
       this.singerData = this.singer
+			this._getSingerData()
     },
     mounted() {
       this.$refs.bgImage.style.background = `url(${this.singerData.avatar}) no-repeat`
@@ -44,15 +47,23 @@
     methods: {
       jumpBack() {
         this.$router.back()
-      }
+      },
+			_getSingerData() {
+				getSingerData(this.singerData.id).then((res)=>{
+						if(res.code===0){
+						this.songsList = res.data.list
+						console.log(res.data)
+					}
+				}).catch((err)=>{
+					console.log(err)
+				})
+			}
     }
   }
 </script>
 
 <style lang="stylus" scoped>
   @import "~common/stylus/variable.styl"
-  /* 可以设置不同的进入和离开动画 */
-  /* 设置持续时间和动画函数 */
   .slide-fade-enter-active, .slide-fade-leave-active
     transition: all .3s ease
 
