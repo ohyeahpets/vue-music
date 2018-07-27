@@ -44,6 +44,7 @@
       if (!this.singer.id) {
         this.$router.back()
       }
+      this.listenScroll = true
     },
     methods: {
       jumpBack() {
@@ -56,7 +57,7 @@
     mounted() {
       this.$refs.bgImage.style.background = `url(${this.singer.avatar}) no-repeat`
       this.$refs.bgImage.style.backgroundSize = 'cover'
-      this.$refs.bgImage.style.transform = `scale()`
+      // this.$refs.bgImage.style.transform = `scale()`
       this.$refs.list.$el.style.top = 0.7 * this.getWindowWidth() + 'px'
     }
   }
@@ -143,5 +144,4 @@
       bottom 0
       left 0
       right 0
-      overflow hidden
 </style>
