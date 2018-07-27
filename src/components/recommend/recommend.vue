@@ -6,7 +6,7 @@
         <div class="recommend_list">
           <h3 class="list-title">热门歌单推荐</h3>
           <ul>
-            <li v-for="item in discList" class="item" :key="item.dissid">
+            <li v-for="item in discList" class="item" :key="item.dissid" @click="selectItem(item.dissid)">
               <div class="avatar">
                 <img v-lazy="item.imgurl"
                      alt="">
@@ -27,7 +27,7 @@
 <script>
   import Carousel from 'base/carousel/carousel'
   import loading from 'base/loading/loading'
-  import {getRecommend, getDiscList} from 'api/recommend'
+  import {getRecommend, getDiscList, getCdInfo} from 'api/recommend'
   import {ERR_OK} from 'api/config'
   import Scroll from 'base/scroll/scroll'
 
@@ -49,6 +49,12 @@
       this._getDiscList()
     },
     methods: {
+      selectItem(dissid) {
+        // this._getCdInfo(dissid)
+        this.$router.push({
+          path: `/recommend/${dissid}`
+        })
+      },
       _getRecommend() {
         getRecommend().then((res) => {
           if (res.code === ERR_OK) {
@@ -61,9 +67,16 @@
       _getDiscList() {
         getDiscList().then((res) => {
           if (res.code === ERR_OK) {
-            // console.log(res.data.list)
+            console.log(res.data.list)
             this.discList = res.data.list
           }
+        }).catch((err) => {
+          console.log(err)
+        })
+      },
+      _getCdInfo(dissid) {
+        getCdInfo(dissid).then((res) => {
+          console.log(res)
         }).catch((err) => {
           console.log(err)
         })
@@ -81,7 +94,6 @@
     bottom 0
     left 0
     right 0
-    overflow hidden
     .common_content
       height 100%
 

@@ -33,6 +33,7 @@
     left: 0
     height: 88px
     width: 100%
+    z-index: 1
     .cHeader_f
       position fixed
       width 100%

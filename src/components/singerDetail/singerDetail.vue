@@ -18,6 +18,7 @@
   import SongsList from 'components/songsList/songsList'
   import {mapGetters} from 'vuex'
   import {getSingerData} from 'api/singer'
+  import {createSongs} from 'common/js/song'
 
   export default {
     name: 'singer-detail',
@@ -43,6 +44,7 @@
     mounted() {
       this.$refs.bgImage.style.background = `url(${this.singerData.avatar}) no-repeat`
       this.$refs.bgImage.style.backgroundSize = 'cover'
+      this.$refs.bgImage.style.transform = `scale()`
     },
     methods: {
       jumpBack() {
@@ -51,12 +53,19 @@
       _getSingerData() {
         getSingerData(this.singerData.id).then((res) => {
           if (res.code === 0) {
-            this.songsList = res.data.list
-            console.log(res.data)
+            this.songsList = this._normalizeList(res.data.list)
+            console.log(this.songsList)
           }
         }).catch((err) => {
           console.log(err)
         })
+      },
+      _normalizeList(list) {
+        let res = []
+        list.forEach((item) => {
+          res.push(createSongs(item.musicData))
+        })
+        return res
       }
     }
   }
