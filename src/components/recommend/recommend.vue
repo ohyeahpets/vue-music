@@ -19,8 +19,9 @@
           </ul>
         </div>
       </div>
+      <loading v-show="!discList"></loading>
     </Scroll>
-    <loading v-show="!discList"></loading>
+    <router-view></router-view>
   </div>
 </template>
 
@@ -30,6 +31,7 @@
   import {getRecommend, getDiscList, getCdInfo} from 'api/recommend'
   import {ERR_OK} from 'api/config'
   import Scroll from 'base/scroll/scroll'
+  import {createSongs} from 'common/js/song'
 
   export default {
     name: 'recommend',
@@ -50,7 +52,7 @@
     },
     methods: {
       selectItem(dissid) {
-        // this._getCdInfo(dissid)
+        this._getCdInfo(dissid)
         this.$router.push({
           path: `/recommend/${dissid}`
         })
@@ -76,7 +78,7 @@
       },
       _getCdInfo(dissid) {
         getCdInfo(dissid).then((res) => {
-          console.log(res)
+          console.log(res.cdlist)
         }).catch((err) => {
           console.log(err)
         })

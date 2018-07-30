@@ -3,12 +3,13 @@
     <div class="back" @click="jumpBack"><i class="icon-back"></i></div>
     <h1 class="title">{{singer.name}}</h1>
     <div class="bg-image" ref="bgImage">
-      <div class="play-wrapper">
-        <div class="play"><i class="icon-play"></i> <span class="text">随机播放全部</span></div>
+      <div class="play-wrapper" v-if="songsList.length>0">
+        <div class="play" v-show="isPlayHide"><i class="icon-play"></i> <span class="text">随机播放全部</span></div>
       </div>
       <div class="filter"></div>
     </div>
-    <Scroll class="list" ref="list">
+    <div class="bg-layer" :style="_transformHeight" ref="bgLayer"></div>
+    <Scroll class="list" ref="list" @scroll="_scrolling" :listenScroll="listenScroll" :probeType="probeType">
       <SongsList :songsList="songsList"></SongsList>
       <Loading v-show="!songsList.length>0"></Loading>
     </Scroll>
@@ -21,6 +22,7 @@
   import Scroll from 'base/scroll/scroll'
   import {mapGetters} from 'vuex'
 
+  const INDEX_TITLE_HEIGHT = 40
   export default {
     name: 'music-list',
     props: {
@@ -30,7 +32,11 @@
       }
     },
     data() {
-      return {}
+      return {
+        bgImageH: 0,
+        scrollY: -1,
+        isPlayHide: true
+      }
     },
     components: {
       Scroll,
@@ -45,6 +51,8 @@
         this.$router.back()
       }
       this.listenScroll = true
+      this.probeType = 3
+      this.bgImageH = 0.7 * this.getWindowWidth()
     },
     methods: {
       jumpBack() {
@@ -52,13 +60,41 @@
       },
       getWindowWidth() {
         return document.body.clientWidth || window.innerWidth
+      },
+      _scrolling(pos) {
+        this.scrollY = pos.y
+      },
+      _transformHeight(str) {
+        this.$refs.bgLayer.style.transform = `translate3d(0,${str},0)`
       }
     },
     mounted() {
       this.$refs.bgImage.style.background = `url(${this.singer.avatar}) no-repeat`
       this.$refs.bgImage.style.backgroundSize = 'cover'
-      // this.$refs.bgImage.style.transform = `scale()`
       this.$refs.list.$el.style.top = 0.7 * this.getWindowWidth() + 'px'
+      this._transformHeight(0)
+    },
+    watch: {
+      scrollY(newVal) {
+        if ((this.bgImageH + newVal) <= INDEX_TITLE_HEIGHT) {
+          // 修改bg-image的高度
+          this.$refs.bgImage.style.height = INDEX_TITLE_HEIGHT + 'px'
+          this.$refs.bgImage.style.paddingBottom = 0
+          this.$refs.bgImage.style.zIndex = 10
+          this.isPlayHide = false
+        } else {
+          // 修改bg-image的高度
+          this.$refs.bgImage.style.height = 0
+          this.$refs.bgImage.style.paddingBottom = '70%'
+          this.$refs.bgImage.style.zIndex = 0
+          this.isPlayHide = true
+          this._transformHeight(`${newVal}px`)
+        }
+        if (newVal >= 0) {
+          let percent = 1 + newVal / this.getWindowWidth()
+          this.$refs.bgImage.style.transform = `scale(${percent})`
+        }
+      }
     }
   }
 </script>
@@ -144,4 +180,8 @@
       bottom 0
       left 0
       right 0
+    .bg-layer
+      position: relative
+      height: 100%
+      background: $color-background
 </style>

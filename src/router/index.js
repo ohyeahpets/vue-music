@@ -17,7 +17,14 @@ export default new Router({
     {
       path: '/recommend',
       name: 'recommend',
-      component: Recommend
+      component: Recommend,
+      children: [
+        {
+          path: ':id',
+          name: 'singer-detail',
+          component: SingerDetail
+        }
+      ]
     },
     {
       path: '/singer',

@@ -39,16 +39,20 @@ export function getDiscList() {
  * 热门歌单推荐接口
  * */
 export function getCdInfo(disstid) {
-  const url = 'https://c.y.qq.com/v8/fcg-bin/fcg_v8_singer_track_cp.fcg'
+  const url = '/api/getCdInfo'
   const data = Object.assign({}, commonParams, {
-    hostUin: 0,
-    platform: 'yqq',
-    needNewCode: 0,
-    disstid: disstid,
+    disstid,
     type: 1,
     json: 1,
     utf8: 1,
-    onlysong: 0
+    onlysong: 0,
+    platform: 'yqq',
+    hostUin: 0,
+    needNewCode: 0
   })
-  return jsonp(url, data, options)
+  return axios.get(url, {
+    params: data
+  }).then((res) => {
+    return Promise.resolve(res.data)
+  })
 }
