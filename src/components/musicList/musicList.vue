@@ -47,9 +47,9 @@
       ...mapGetters(['singer'])
     },
     created() {
-      if (!this.singer.id) {
-        this.$router.back()
-      }
+//      if (!this.singer.id) {
+//        this.$router.back()
+//      }
       this.listenScroll = true
       this.probeType = 3
       this.bgImageH = 0.7 * this.getWindowWidth()
