@@ -31,7 +31,7 @@
         getSingerData(this.singer.id).then((res) => {
           if (res.code === 0) {
             this.songsList = this._normalizeList(res.data.list)
-//            console.log(this.songsList)
+            console.log(this.songsList)
           }
         }).catch((err) => {
           console.log(err)
