@@ -2,10 +2,10 @@
   <div class="songs-list-wrapper">
     <div class="songs-list">
       <ul>
-        <li class="item" v-for="(item,index) in songsList" v-if="songsList.length>0">
+        <li class="item" v-for="(item,index) in songsList" v-if="songsList.length>0" @click="selectItem(item,index)">
           <div class="rank" v-show="isShowRank">
             <span class="icon" :class="_rankThree(index)" v-if="index>=0&&index<=2"></span>
-            <span class="text" v-else>{{index+1}}</span>
+            <span class="text" v-else>{{index + 1}}</span>
           </div>
           <div class="content">
             <h2 class="name">{{item.name}}</h2>
@@ -33,6 +33,9 @@
     methods: {
       _rankThree(i) {
         return `icon${i}`
+      },
+      selectItem(item, index) {
+        this.$emit('select', item, index)
       }
     }
   }

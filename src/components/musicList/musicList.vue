@@ -10,7 +10,7 @@
     </div>
     <div class="bg-layer" :style="_transformHeight" ref="bgLayer"></div>
     <Scroll class="list" ref="list" @scroll="_scrolling" :listenScroll="listenScroll" :probeType="probeType">
-      <SongsList :songsList="songsList"></SongsList>
+      <SongsList :songsList="songsList" @select="selectItem"></SongsList>
       <Loading v-show="!songsList.length>0"></Loading>
     </Scroll>
   </div>
@@ -55,6 +55,9 @@
       this.bgImageH = 0.7 * this.getWindowWidth()
     },
     methods: {
+      selectItem(item, index) {
+        console.log(item, index)
+      },
       jumpBack() {
         this.$router.back()
       },
