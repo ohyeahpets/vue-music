@@ -19,9 +19,6 @@ const mutations = {
   [types.SET_FULL_SCREEN](state, tag) {
     state.fullScreen = tag
   },
-  [types.SET_DURATION](state, duration) {
-    state.duration = duration
-  },
   [types.SET_CURRENT_INDEX](state, currentIndex) {
     state.currentIndex = currentIndex
   }

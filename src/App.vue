@@ -4,15 +4,18 @@
     <keep-alive>
       <router-view></router-view>
     </keep-alive>
+    <player></player>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   import CommonHeader from 'components/commonHeader/commonHeader'
+  import Player from 'components/player/player'
 
   export default {
     components: {
-      CommonHeader
+      CommonHeader,
+      Player
     }
   }
 </script>

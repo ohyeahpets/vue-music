@@ -10,8 +10,6 @@ export const playingMode = state => state.playingMode
 
 export const fullScreen = state => state.fullScreen
 
-export const duration = state => state.duration
-
 export const currentIndex = state => state.currentIndex
 
 export const currentSong = (state) => {
