@@ -20,7 +20,7 @@
   import SongsList from 'base/songsList/songsList'
   import Loading from 'base/loading/loading'
   import Scroll from 'base/scroll/scroll'
-  import {mapGetters} from 'vuex'
+  import {mapGetters, mapActions} from 'vuex'
 
   const INDEX_TITLE_HEIGHT = 40
   export default {
@@ -47,16 +47,17 @@
       ...mapGetters(['singer'])
     },
     created() {
-//      if (!this.singer.id) {
-//        this.$router.back()
-//      }
+      if (!this.singer.id) {
+        this.$router.back()
+      }
       this.listenScroll = true
       this.probeType = 3
       this.bgImageH = 0.7 * this.getWindowWidth()
     },
     methods: {
+      ...mapActions(['selectPlay']),
       selectItem(item, index) {
-        console.log(item, index)
+        this.selectPlay({list: this.songsList, index: index})
       },
       jumpBack() {
         this.$router.back()

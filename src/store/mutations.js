@@ -5,7 +5,7 @@ const mutations = {
     state.singer = singer
   },
   [types.SET_PLAYING_LIST](state, list) {
-    state.playingList = list
+    state.playList = list
   },
   [types.SET_SEQUENCE_LIST](state, list) {
     state.sequenceList = list

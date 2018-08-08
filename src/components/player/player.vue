@@ -1,77 +1,140 @@
 <template>
-  <div class="player" v-show="">
-    <div class="normal-player">
-      <div class="background">
-        <img width="100%" height="100%"
-             src="https://y.gtimg.cn/music/photo_new/T002R300x300M000004RThJi4G1v0A.jpg?max_age=2592000" alt="">
-      </div>
-      <div class="top">
-        <div class="back">
-          <i class="icon-back"></i>
+  <div class="player" v-show="playList.length>0">
+    <transition name="nplayer">
+      <div class="normal-player" v-show="fullScreen">
+        <div class="background">
+          <img width="100%" height="100%"
+               :src="currentSong.image" alt="">
         </div>
-        <div class="name">怪咖</div>
-        <div class="singerName">薛之谦</div>
-      </div>
-      <div class="middle">
-        <div class="middle-l">
-          <div class="cd-wrapper">
-            <div class="cd">
-              <img class="image"
-                   src="https://y.gtimg.cn/music/photo_new/T002R300x300M000004RThJi4G1v0A.jpg?max_age=2592000" alt="">
+        <transition name="fadeTop">
+          <div class="top" v-show="fullScreen">
+            <div class="back" @click="closePlayer">
+              <i class="icon-back"></i>
+            </div>
+            <div class="name">{{currentSong.name}}</div>
+            <div class="singerName">{{currentSong.singer}}</div>
+          </div>
+        </transition>
+        <div class="middle">
+          <div class="middle-l">
+            <div class="cd-wrapper">
+              <div class="cd">
+                <img class="image"
+                     :src="currentSong.image" alt="">
+              </div>
+            </div>
+            <div class="playing-lyric-wrapper">
+              <div class="playing-lyric">lyric</div>
             </div>
           </div>
-          <div class="playing-lyric-wrapper">
-            <div class="playing-lyric">怪咖 - 薛之谦</div>
+        </div>
+        <transition name="fadeBottom">
+          <div class="bottom" v-show="fullScreen">
+            <div class="operators">
+              <div class="icon i-left">
+                <i class="icon-sequence"></i>
+              </div>
+              <div class="icon i-left">
+                <i class="icon-prev"></i>
+              </div>
+              <div class="icon i-center">
+                <i class="icon-pause" :class="playingCls" @click="togglePlay"></i>
+              </div>
+              <div class="icon i-right">
+                <i class="icon-next"></i>
+              </div>
+              <div class="icon i-right">
+                <i class="icon-not-favorite"></i>
+              </div>
+            </div>
+          </div>
+        </transition>
+      </div>
+    </transition>
+    <transition name="mplayer">
+      <div class="mini-player" v-show="!fullScreen" @click="openPlayer">
+        <div class="icon">
+          <div class="imgWrapper">
+            <img :src="currentSong.image" alt="">
           </div>
         </div>
-      </div>
-      <div class="bottom">
-        <div class="operators">
-          <div class="icon i-left">
-            <i class="icon-sequence"></i>
-          </div>
-          <div class="icon i-left">
-            <i class="icon-prev"></i>
-          </div>
-          <div class="icon i-center">
-            <i class="icon-play"></i>
-          </div>
-          <div class="icon i-right">
-            <i class="icon-next"></i>
-          </div>
-          <div class="icon i-right">
-            <i class="icon-not-favorite"></i>
-          </div>
+        <div class="text">
+          <h3 class="name">{{currentSong.name}}</h3>
+          <p class="desc">{{currentSong.singer}}</p>
+        </div>
+        <div class="control">
+          <i class="icon-play-mini" :class="miniPlayingCls" @click.stop="togglePlay"></i>
+        </div>
+        <div class="control">
+          <i class="icon-playlist"></i>
         </div>
       </div>
-    </div>
-    <div class="mini-player" v-show="">
-      <div class="icon">
-        <div class="imgWrapper">
-          <img src="https://y.gtimg.cn/music/photo_new/T002R300x300M000004RThJi4G1v0A.jpg?max_age=2592000" alt="">
-        </div>
-      </div>
-      <div class="text">
-        <h3 class="name">怪咖</h3>
-        <p class="desc">薛之谦</p>
-      </div>
-      <div class="control">
-        <i class="icon-play-mini"></i>
-      </div>
-      <div class="control">
-        <i class="icon-playlist"></i>
-      </div>
-    </div>
+    </transition>
+    <audio :src="currentSong.url" ref="audio" autoplay></audio>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-  export default {}
+  import {mapGetters, mapMutations} from 'vuex'
+
+  export default {
+    data() {
+      return {}
+    },
+    computed: {
+      ...mapGetters(['playList', 'playingState', 'fullScreen', 'currentSong']),
+      playingCls() {
+        return this.playingState ? 'icon-pause' : 'icon-play'
+      },
+      miniPlayingCls() {
+        return this.playingState ? 'icon-pause' : 'icon-play'
+      }
+    },
+    methods: {
+      ...mapMutations({setFullScreen: 'SET_FULL_SCREEN', setPlayingState: 'SET_PLAYING_STATE'}),
+      closePlayer() {
+        this.setFullScreen(false)
+      },
+      openPlayer() {
+        this.setFullScreen(true)
+      },
+      togglePlay() {
+        this.setPlayingState(!this.playingState)
+      }
+    },
+    watch: {
+      playingState(state) {
+        setTimeout(() => {
+          state ? this.$refs.audio.play() : this.$refs.audio.pause()
+        }, 20)
+      }
+    }
+  }
 </script>
 
 <style lang="stylus" scoped>
   @import "~common/stylus/variable.styl"
   @import "~common/stylus/mixin.styl"
+  .fadeBottom-enter-active, .fadeBottom-leave-active
+    transition all .2s cubic-bezier(1.0, 0.5, 0.8, 1.0)
+
+  .fadeBottom-enter, .fadeBottom-leave-to
+    transform translateY(40px)
+    opacity 0
+
+  .fadeTop-enter-active, .fadeTop-leave-active
+    transition all .2s cubic-bezier(1.0, 0.5, 0.8, 1.0)
+
+  .fadeTop-enter, .fadeTop-leave-to
+    transform translateY(-60px)
+    opacity 0
+
+  .nplayer-enter-active, .nplayer-leave-active, .mplayer-enter-active, .mplayer-leave-active
+    transition all 0.5s
+
+  .nplayer-enter, .nplayer-leave-to, .mplayer-enter, .mplayer-leave-to
+    opacity 0
+
   .player
     .normal-player
       position fixed
@@ -118,6 +181,9 @@
           font-size $font-size-medium
           line-height 20px
       .middle
+        position fixed
+        width 100%
+        top 85px
         .middle-l
           position relative
           width 100%
