@@ -20,6 +20,7 @@
             <div class="cd-wrapper">
               <div class="cd">
                 <img class="image"
+                     :class="cdImageCls"
                      :src="currentSong.image" alt="">
               </div>
             </div>
@@ -88,6 +89,9 @@
       },
       miniPlayingCls() {
         return this.playingState ? 'icon-pause' : 'icon-play'
+      },
+      cdImageCls() {
+        return this.playingState ? 'play' : ''
       }
     },
     methods: {
@@ -207,6 +211,8 @@
                 box-sizing border-box
                 border 10px solid hsla(0, 0%, 100%, .1)
                 border-radius 50%
+                &.play
+                  animation rotate 20s linear infinite
           .playing-lyric-wrapper
             width 80%
             margin 30px auto 0
@@ -279,4 +285,13 @@
         .icon-playlist
           font-size: 30px
           color: rgba(255, 205, 49, .5)
+
+  @keyframes rotate {
+    0% {
+      transform rotate(0)
+    }
+    100% {
+      transform rotate(360deg)
+    }
+  }
 </style>
