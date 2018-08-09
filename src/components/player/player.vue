@@ -1,6 +1,11 @@
 <template>
   <div class="player" v-show="playList.length>0">
-    <transition name="nplayer">
+    <transition name="nplayer"
+                @enter="enter"
+                @after-enter="afterEnter"
+                @leave="leave"
+                @after-leave="afterLeave"
+    >
       <div class="normal-player" v-show="fullScreen">
         <div class="background">
           <img width="100%" height="100%"
@@ -17,7 +22,7 @@
         </transition>
         <div class="middle">
           <div class="middle-l">
-            <div class="cd-wrapper">
+            <div class="cd-wrapper" ref="cdWrapper">
               <div class="cd">
                 <img class="image"
                      :class="cdImageCls"
@@ -31,18 +36,25 @@
         </div>
         <transition name="fadeBottom">
           <div class="bottom" v-show="fullScreen">
+            <div class="progress-wrapper">
+              <span class="time time-left">{{songCurrentTime}}</span>
+              <div class="progress-bar-wrapper">
+                <progressBar></progressBar>
+              </div>
+              <span class="time time-right">{{_handleDuration(currentSong.duration)}}</span>
+            </div>
             <div class="operators">
               <div class="icon i-left">
                 <i class="icon-sequence"></i>
               </div>
               <div class="icon i-left">
-                <i class="icon-prev"></i>
+                <i class="icon-prev" @click="prev"></i>
               </div>
               <div class="icon i-center">
                 <i class="icon-pause" :class="playingCls" @click="togglePlay"></i>
               </div>
               <div class="icon i-right">
-                <i class="icon-next"></i>
+                <i class="icon-next" @click="next"></i>
               </div>
               <div class="icon i-right">
                 <i class="icon-not-favorite"></i>
@@ -56,7 +68,7 @@
       <div class="mini-player" v-show="!fullScreen" @click="openPlayer">
         <div class="icon">
           <div class="imgWrapper">
-            <img :src="currentSong.image" alt="">
+            <img :src="currentSong.image" alt="" :class="cdImageCls">
           </div>
         </div>
         <div class="text">
@@ -71,19 +83,28 @@
         </div>
       </div>
     </transition>
-    <audio :src="currentSong.url" ref="audio" autoplay></audio>
+    <audio :src="currentSong.url" ref="audio" @canplay="songPlaying" @timeupdata="updatatime"
+           @ended="songEnded"></audio>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   import {mapGetters, mapMutations} from 'vuex'
+  import animations from 'create-keyframe-animation'
+  import progressBar from 'components/progressBar/progressBar'
 
+  const TOP_HEIGHT = 85
   export default {
+    components: {
+      progressBar
+    },
     data() {
-      return {}
+      return {
+        songCurrentTime: 0
+      }
     },
     computed: {
-      ...mapGetters(['playList', 'playingState', 'fullScreen', 'currentSong']),
+      ...mapGetters(['playList', 'playingState', 'fullScreen', 'currentSong', 'currentIndex']),
       playingCls() {
         return this.playingState ? 'icon-pause' : 'icon-play'
       },
@@ -91,11 +112,56 @@
         return this.playingState ? 'icon-pause' : 'icon-play'
       },
       cdImageCls() {
-        return this.playingState ? 'play' : ''
+        return this.playingState ? 'play' : 'play pause'
       }
     },
     methods: {
-      ...mapMutations({setFullScreen: 'SET_FULL_SCREEN', setPlayingState: 'SET_PLAYING_STATE'}),
+      ...mapMutations({
+        setFullScreen: 'SET_FULL_SCREEN',
+        setPlayingState: 'SET_PLAYING_STATE',
+        setCurrentIndex: 'SET_CURRENT_INDEX'
+      }),
+      enter(el, done) {
+        const {x, y, scale} = this._getPosAndScale()
+        let animation = {
+          0: {
+            transform: `translate3d(${x}px,${y}px,0) scale(${scale})`
+          },
+          60: {
+            transform: `translate3d(0,0,0) scale(1.1)`
+          },
+          100: {
+            transform: `translate3d(0,0,0) scale(1)`
+          }
+        }
+        animations.registerAnimation({
+          name: 'move',
+          animation,
+          presets: {
+            duration: 400,
+            easing: 'linear'
+          }
+        })
+        animations.runAnimation(this.$refs.cdWrapper, 'move', done)
+      },
+      afterEnter() {
+        animations.unregisterAnimation('move')
+        this.$refs.cdWrapper.style.animation = ''
+      },
+      leave(el, done) {
+        this.$refs.cdWrapper.style.transition = `all 0.4s`
+        const {x, y, scale} = this._getPosAndScale()
+        this.$refs.cdWrapper.style.transform = `translate3d(${x}px,${y}px,0) scale(${scale})`
+        const timer = setTimeout(done, 400)
+        this.$refs.cdWrapper.addEventListener('transitionend', () => {
+          clearTimeout(timer)
+          done()
+        })
+      },
+      afterLeave() {
+        this.$refs.cdWrapper.style.transition = ''
+        this.$refs.cdWrapper.style.transform = ''
+      },
       closePlayer() {
         this.setFullScreen(false)
       },
@@ -104,13 +170,83 @@
       },
       togglePlay() {
         this.setPlayingState(!this.playingState)
+      },
+      prev() {
+        let index = this.currentIndex
+        index--
+        if (index <= -1) {
+          index = this.playList.length - 1
+        }
+        this.setCurrentIndex(index)
+        this._setPlayer(true)
+      },
+      next() {
+        let index = this.currentIndex
+        index++
+        if (index >= this.playList.length) {
+          index = 0
+        }
+        this.setCurrentIndex(index)
+        this._setPlayer(true)
+      },
+      songEnded() {
+        this._setPlayer(false)
+      },
+      songPlaying(e) {
+        console.log(e.target.currentTime)
+        this.songCurrentTime = this._handleDuration(e.target.currentTime)
+      },
+      updatatime(e) {
+        console.log(e)
+        this.songCurrentTime = this._handleDuration(e.target.currentTime)
+      },
+      _setPlayer(tag) {
+        this.setPlayingState(tag)
+      },
+      _handleDuration(time) {
+        let minute = Math.floor(time / 60)
+        let second = time % 60
+        return `${minute}:${this.addZer0Func(second)}`
+      },
+      addZer0Func(num) {
+        if (num / 10 < 1) num = '0' + num
+        return num
+      },
+      _getPosAndScale() {
+        let miniOffsetLeft = 40
+        let miniOffsetBottom = 30
+        let normalOffsetLeft = this._getWindowWidth() * 0.5
+        let normalOffsetTop = this._getWindowWidth() * 0.5 / 2 + TOP_HEIGHT
+        let x
+        let y
+        let scale
+        x = -(normalOffsetLeft - miniOffsetLeft)
+        y = this._getWindowHeight() - miniOffsetBottom - normalOffsetTop
+        scale = 0.5 % miniOffsetLeft / (this._getWindowWidth() * 0.5)
+        return {x, y, scale}
+      },
+      _getWindowWidth() {
+        return window.innerWidth || document.body.clientWidth
+      },
+      _getWindowHeight() {
+        return window.innerHeight || document.body.clientHeight
       }
     },
     watch: {
       playingState(state) {
+        console.log(state)
         setTimeout(() => {
           state ? this.$refs.audio.play() : this.$refs.audio.pause()
         }, 20)
+      },
+      currentSong(newSong) {
+        // console.log(newSong)
+        // if (newSong) {
+        //   setTimeout(() => {
+        //     this.songCurrentTime = this._handleDuration(this.$refs.audio.currentTime)
+        //     console.log(this.songCurrentTime)
+        //   }, 20)
+        // }
       }
     }
   }
@@ -213,6 +349,8 @@
                 border-radius 50%
                 &.play
                   animation rotate 20s linear infinite
+                &.pause
+                  animation-play-state paused
           .playing-lyric-wrapper
             width 80%
             margin 30px auto 0
@@ -227,6 +365,24 @@
         position absolute
         bottom 50px
         width 100%
+        .progress-wrapper
+          display flex
+          align-items center
+          width 80%
+          margin 0 auto
+          .time
+            color #fff
+            font-size $font-size-small
+            line-height 30px
+            width 30px
+            flex 0 0 30px
+            &.time-left
+              text-align left
+            &.time-right
+              text-align right
+          .progress-bar-wrapper
+            flex 1
+            height 30px
         .operators
           display flex
           align-items center
@@ -264,6 +420,10 @@
           img
             width 100%
             border-radius 50%
+            &.play
+              animation rotate 20s linear infinite
+            &.pause
+              animation-play-state paused
       .text
         flex 1
         .name
