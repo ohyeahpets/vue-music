@@ -37,9 +37,9 @@
         <transition name="fadeBottom">
           <div class="bottom" v-show="fullScreen">
             <div class="progress-wrapper">
-              <span class="time time-left">{{songCurrentTime}}</span>
+              <span class="time time-left">{{_handleDuration(Math.floor(songCurrentTime))}}</span>
               <div class="progress-bar-wrapper">
-                <progressBar></progressBar>
+                <progressBar :percent="percent"></progressBar>
               </div>
               <span class="time time-right">{{_handleDuration(currentSong.duration)}}</span>
             </div>
@@ -83,7 +83,7 @@
         </div>
       </div>
     </transition>
-    <audio :src="currentSong.url" ref="audio" @canplay="songPlaying" @timeupdata="updatatime"
+    <audio :src="currentSong.url" ref="audio" @canplay="ready" @timeupdate="updatetime" @error="error"
            @ended="songEnded"></audio>
   </div>
 </template>
@@ -100,6 +100,7 @@
     },
     data() {
       return {
+        songReady: false,
         songCurrentTime: 0
       }
     },
@@ -113,6 +114,9 @@
       },
       cdImageCls() {
         return this.playingState ? 'play' : 'play pause'
+      },
+      percent() {
+        return this.songCurrentTime / this.currentSong.duration
       }
     },
     methods: {
@@ -169,9 +173,15 @@
         this.setFullScreen(true)
       },
       togglePlay() {
+        if (!this.songReady) {
+          return
+        }
         this.setPlayingState(!this.playingState)
       },
       prev() {
+        if (!this.songReady) {
+          return
+        }
         let index = this.currentIndex
         index--
         if (index <= -1) {
@@ -179,8 +189,12 @@
         }
         this.setCurrentIndex(index)
         this._setPlayer(true)
+        this.songReady = false
       },
       next() {
+        if (!this.songReady) {
+          return
+        }
         let index = this.currentIndex
         index++
         if (index >= this.playList.length) {
@@ -188,17 +202,20 @@
         }
         this.setCurrentIndex(index)
         this._setPlayer(true)
+        this.songReady = false
       },
       songEnded() {
-        this._setPlayer(false)
+        // this._setPlayer(false)
+        this.next()
       },
-      songPlaying(e) {
-        console.log(e.target.currentTime)
-        this.songCurrentTime = this._handleDuration(e.target.currentTime)
+      ready() {
+        this.songReady = true
       },
-      updatatime(e) {
-        console.log(e)
-        this.songCurrentTime = this._handleDuration(e.target.currentTime)
+      error() {
+        this.songReady = true
+      },
+      updatetime(e) {
+        this.songCurrentTime = e.target.currentTime
       },
       _setPlayer(tag) {
         this.setPlayingState(tag)
@@ -206,9 +223,9 @@
       _handleDuration(time) {
         let minute = Math.floor(time / 60)
         let second = time % 60
-        return `${minute}:${this.addZer0Func(second)}`
+        return `${minute}:${this.addZeroFunc(second)}`
       },
-      addZer0Func(num) {
+      addZeroFunc(num) {
         if (num / 10 < 1) num = '0' + num
         return num
       },
@@ -234,19 +251,14 @@
     },
     watch: {
       playingState(state) {
-        console.log(state)
         setTimeout(() => {
           state ? this.$refs.audio.play() : this.$refs.audio.pause()
         }, 20)
       },
-      currentSong(newSong) {
-        // console.log(newSong)
-        // if (newSong) {
-        //   setTimeout(() => {
-        //     this.songCurrentTime = this._handleDuration(this.$refs.audio.currentTime)
-        //     console.log(this.songCurrentTime)
-        //   }, 20)
-        // }
+      currentSong(newSong, oldSong) {
+        setTimeout(() => {
+          this.$refs.audio.play()
+        }, 20)
       }
     }
   }
